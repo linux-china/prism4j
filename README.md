@@ -81,6 +81,7 @@ Currently, it supports:
 * asppnet
 * awk
 * bash
+* nushell
 * basic
 * batch
 * bnf
