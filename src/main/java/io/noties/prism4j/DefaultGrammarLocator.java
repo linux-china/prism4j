@@ -33,7 +33,7 @@ public class DefaultGrammarLocator implements GrammarLocator {
   }
 
   @SuppressWarnings("ConstantConditions")
-  private static final Grammar NULL =
+  private static final Grammar NULL_GRAMMAR =
     new Grammar() {
       @Override
       public @NotNull String name() {
@@ -46,22 +46,22 @@ public class DefaultGrammarLocator implements GrammarLocator {
       }
     };
 
-  private final HashMap<String, Grammar> cache = new HashMap<>(100);
+  private final HashMap<String, Grammar> grammarCache = new HashMap<>(100);
 
   @Nullable
   @Override
   public Grammar grammar(@NotNull Prism4j prism4j, @NotNull String language) {
     final String name = realLanguageName(language);
-    Grammar grammar = cache.get(name);
+    Grammar grammar = grammarCache.get(name);
     if (grammar != null) {
-      if (NULL == grammar) {
+      if (NULL_GRAMMAR == grammar) {
         grammar = null;
       }
       return grammar;
     }
 
     grammar = obtainGrammar(prism4j, name);
-    cache.put(name, Objects.requireNonNullElse(grammar, NULL));
+    grammarCache.put(name, Objects.requireNonNullElse(grammar, NULL_GRAMMAR));
 
     return grammar;
   }
@@ -383,6 +383,10 @@ public class DefaultGrammarLocator implements GrammarLocator {
       case "nix":
         grammar = Prism_nix.create(prism4j);
         break;
+      case "nu":
+      case "nushell":
+        grammar = Prism_nushell.create(prism4j);
+        break;
       case "objectivec":
         grammar = Prism_objectivec.create(prism4j);
         break;
@@ -479,101 +483,102 @@ public class DefaultGrammarLocator implements GrammarLocator {
   @Override
   @NotNull
   public HashSet<String> languages() {
-    final HashSet<String> set = new HashSet<>(150);
-    set.add("abap");
-    set.add("abnf");
-    set.add("actionscript");
-    set.add("ada");
-    set.add("antlr4");
-    set.add("apacheconf");
-    set.add("applescript");
-    set.add("armasm");
-    set.add("aspnet");
-    set.add("awk");
-    set.add("bash");
-    set.add("basic");
-    set.add("batch");
-    set.add("bnf");
-    set.add("c");
-    set.add("clike");
-    set.add("clojure");
-    set.add("cmake");
-    set.add("cobol");
-    set.add("cpp");
-    set.add("csharp");
-    set.add("csv");
-    set.add("css");
-    set.add("css-extras");
-    set.add("dart");
-    set.add("diff");
-    set.add("docker");
-    set.add("dot");
-    set.add("ebnf");
-    set.add("editorconfig");
-    set.add("elixir");
-    set.add("erlang");
-    set.add("fortran");
-    set.add("fsharp");
-    set.add("git");
-    set.add("go");
-    set.add("graphql");
-    set.add("groovy");
-    set.add("haskell");
-    set.add("haxe");
-    set.add("hcl");
-    set.add("http");
-    set.add("ignore");
-    set.add("ini");
-    set.add("java");
-    set.add("javastacktrace");
-    set.add("javascript");
-    set.add("json");
-    set.add("json5");
-    set.add("just");
-    set.add("jsstacktrace");
-    set.add("jsx");
-    set.add("julia");
-    set.add("kotlin");
-    set.add("latex");
-    set.add("lisp");
-    set.add("lua");
-    set.add("makefile");
-    set.add("markdown");
-    set.add("markup");
-    set.add("matlab");
-    set.add("mermaid");
-    set.add("nasm");
-    set.add("nginx");
-    set.add("nix");
-    set.add("objectivec");
-    set.add("ocaml");
-    set.add("pascal");
-    set.add("perl");
-    set.add("php");
-    set.add("plant-uml");
-    set.add("plsql");
-    set.add("powershell");
-    set.add("properties");
-    set.add("prolog");
-    set.add("protobuf");
-    set.add("puppet");
-    set.add("python");
-    set.add("r");
-    set.add("regex");
-    set.add("ruby");
-    set.add("rust");
-    set.add("scala");
-    set.add("solidity");
-    set.add("sql");
-    set.add("swift");
-    set.add("systemd");
-    set.add("toml");
-    set.add("tsx");
-    set.add("typescript");
-    set.add("vbnet");
-    set.add("visual-basic");
-    set.add("yaml");
-    set.add("zig");
-    return set;
+    final HashSet<String> languages = new HashSet<>(150);
+    languages.add("abap");
+    languages.add("abnf");
+    languages.add("actionscript");
+    languages.add("ada");
+    languages.add("antlr4");
+    languages.add("apacheconf");
+    languages.add("applescript");
+    languages.add("armasm");
+    languages.add("aspnet");
+    languages.add("awk");
+    languages.add("bash");
+    languages.add("basic");
+    languages.add("batch");
+    languages.add("bnf");
+    languages.add("c");
+    languages.add("clike");
+    languages.add("clojure");
+    languages.add("cmake");
+    languages.add("cobol");
+    languages.add("cpp");
+    languages.add("csharp");
+    languages.add("csv");
+    languages.add("css");
+    languages.add("css-extras");
+    languages.add("dart");
+    languages.add("diff");
+    languages.add("docker");
+    languages.add("dot");
+    languages.add("ebnf");
+    languages.add("editorconfig");
+    languages.add("elixir");
+    languages.add("erlang");
+    languages.add("fortran");
+    languages.add("fsharp");
+    languages.add("git");
+    languages.add("go");
+    languages.add("graphql");
+    languages.add("groovy");
+    languages.add("haskell");
+    languages.add("haxe");
+    languages.add("hcl");
+    languages.add("http");
+    languages.add("ignore");
+    languages.add("ini");
+    languages.add("java");
+    languages.add("javastacktrace");
+    languages.add("javascript");
+    languages.add("json");
+    languages.add("json5");
+    languages.add("just");
+    languages.add("jsstacktrace");
+    languages.add("jsx");
+    languages.add("julia");
+    languages.add("kotlin");
+    languages.add("latex");
+    languages.add("lisp");
+    languages.add("lua");
+    languages.add("makefile");
+    languages.add("markdown");
+    languages.add("markup");
+    languages.add("matlab");
+    languages.add("mermaid");
+    languages.add("nasm");
+    languages.add("nginx");
+    languages.add("nix");
+    languages.add("nushell");
+    languages.add("objectivec");
+    languages.add("ocaml");
+    languages.add("pascal");
+    languages.add("perl");
+    languages.add("php");
+    languages.add("plant-uml");
+    languages.add("plsql");
+    languages.add("powershell");
+    languages.add("properties");
+    languages.add("prolog");
+    languages.add("protobuf");
+    languages.add("puppet");
+    languages.add("python");
+    languages.add("r");
+    languages.add("regex");
+    languages.add("ruby");
+    languages.add("rust");
+    languages.add("scala");
+    languages.add("solidity");
+    languages.add("sql");
+    languages.add("swift");
+    languages.add("systemd");
+    languages.add("toml");
+    languages.add("tsx");
+    languages.add("typescript");
+    languages.add("vbnet");
+    languages.add("visual-basic");
+    languages.add("yaml");
+    languages.add("zig");
+    return languages;
   }
 }
